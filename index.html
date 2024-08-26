@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Cobrinha</title>
+  <style>
+      body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background-color: black;
+          margin: 0;
+      }
+      canvas {
+          border: 1px solid white;
+      }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // configurações iniciais
+      const largura = canvas.width;
+      const altura = canvas.height;
+
+      const tamanhoQuadrado = 10; // tamanho de cada quadrado da cobrinha
+      let velocidadeJogo = 15; // velocidade do jogo
+      let x = largura / 2; // posição inicial da cobrinha no eixo X
+      let y = altura / 2; // posição inicial da cobrinha no eixo Y
+      let velocidadeX = 0; // velocidade inicial no eixo X
+      let velocidadeY = 0; // velocidade inicial no eixo Y
+      let tamanhoCobra = 1; // tamanho inicial da cobrinha
+      const pixels = []; // array para armazenar os segmentos da cobrinha
+      let comidaX, comidaY; // coordenadas da comida
+
+      // função para gerar a comida em posições aleatórias
+      const gerarComida = () => {
+          comidaX = Math.floor(Math.random() * (largura / tamanhoQuadrado)) * tamanhoQuadrado;
+          comidaY = Math.floor(Math.random() * (altura / tamanhoQuadrado)) * tamanhoQuadrado;
+      };
+
+      // função para desenhar a comida
+      const desenharComida = () => {
+          ctx.fillStyle = 'green';
+          ctx.fillRect(comidaX, comidaY, tamanhoQuadrado, tamanhoQuadrado);
+      };
+
+      // função para desenhar a cobrinha
+      const desenharCobra = () => {
+          ctx.fillStyle = 'white';
+          pixels.forEach(pixel => {
+              ctx.fillRect(pixel[0], pixel[1], tamanhoQuadrado, tamanhoQuadrado);
+          });
+      };
+
+      // função para desenhar a pontuação
+      const desenharPontuacao = () => {
+          ctx.fillStyle = 'red';
+          ctx.font = '35px Helvetica';
+          ctx.fillText(`Pontos: ${tamanhoCobra - 1}`, 10, 30);
+      };
+
+      // função para selecionar a velocidade da cobrinha
+      const selecionarVelocidade = (event) => {
+          if (event.key === 'ArrowDown') {
+              velocidadeX = 0;
+              velocidadeY = tamanhoQuadrado;
+          } else if (event.key === 'ArrowUp') {
+              velocidadeX = 0;
+              velocidadeY = -tamanhoQuadrado;
+          } else if (event.key === 'ArrowRight') {
+              velocidadeX = tamanhoQuadrado;
+              velocidadeY = 0;
+          } else if (event.key === 'ArrowLeft') {
+              velocidadeX = -tamanhoQuadrado;
+              velocidadeY = 0;
+          }
+      };
+
+      // função principal que controla o jogo
+      const rodarJogo = () => {
+          ctx.clearRect(0, 0, largura, altura); // limpa o canvas
+          desenharComida(); // desenha a comida
+          desenharCobra(); // desenha a cobrinha
+          desenharPontuacao(); // desenha a pontuação
+
+          // verifica se a cobrinha colidiu com as bordas
+          if (x < 0 || x >= largura || y < 0 || y >= altura) {
+              alert('Fim de Jogo!'); // alerta de fim de jogo
+              document.location.reload(); // reinicia o jogo
+          }
+
+          x += velocidadeX; // atualiza a posição da cobrinha no eixo X
+          y += velocidadeY; // atualiza a posição da cobrinha no eixo Y
+
+          pixels.push([x, y]); // adiciona a nova posição da cobrinha
+          if (pixels.length > tamanhoCobra) {
+              pixels.shift(); // remove o segmento mais antigo se a cobrinha crescer
+          }
+
+          // verifica se a cobrinha colidiu consigo mesma
+          for (let i = 0; i < pixels.length - 1; i++) {
+              if (pixels[i][0] === x && pixels[i][1] === y) {
+                  alert('Fim de Jogo!'); // alerta de fim de jogo
+                  document.location.reload(); // reinicia o jogo
+              }
+          }
+
+          // verifica se a cobrinha comeu a comida
+          if (x === comidaX && y === comidaY) {
+              tamanhoCobra++; // aumenta o tamanho da cobrinha
+              gerarComida(); // gera nova comida
+          }
+
+          setTimeout(rodarJogo, 1000 / velocidadeJogo); // controla a velocidade do jogo
+      };
+
+      document.addEventListener('keydown', selecionarVelocidade); // escuta as teclas pressionadas
+      gerarComida(); // gera a primeira comida
+      rodarJogo(); // inicia o jogo
+  </script>
+</body>
+</html>
